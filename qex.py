@@ -268,7 +268,7 @@ def qiosk_recordings(projectpath,projecttag,sep):
     if len(file_locs)>0:
         k=[]           
         for f in file_locs:
-            File_dets=data_dets(f)
+            File_dets=data_dets(f,sep)
             if File_dets:
                 k.append(File_dets)
         df_datafiles=pd.DataFrame(data=k)#
