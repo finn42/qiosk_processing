@@ -23,8 +23,10 @@ from scipy.interpolate import interp1d
 
 
 
-def min_dets(eq_file_loc): # for csv files output by the qiosk app
-    filings = eq_file_loc.split('\\')
+def min_dets(eq_file_loc,sep): # for csv files output by the qiosk app
+    if not sep:
+        sep = '\\'
+    filings = eq_file_loc.split(sep)
     file_name = filings[-1]
     f = file_name.split('-')
     Signal = f[0]
@@ -52,9 +54,11 @@ def min_dets(eq_file_loc): # for csv files output by the qiosk app
        'FullLoc':eq_file_loc}
     return File_dets
 
-def data_dets(eq_file_loc): #rec_start = V['DateTime'].iloc[0]
+def data_dets(eq_file_loc,sep): #rec_start = V['DateTime'].iloc[0]
+    if not sep:
+        sep = '\\'
     # this file pulls recording details from the file name and from inside file to aggregate all metadata
-    filings = eq_file_loc.split('\\')
+    filings = eq_file_loc.split(sep)
     file_name = filings[-1]
     f = file_name.split('-')
     Signal = f[0]
@@ -180,9 +184,11 @@ def test_plot_signals_interval_save(V,t1,t2,plotname): # V is a qiosk file read 
     else:
         print('No data') 
         
-def matched_files(eq_file_loc,data_path):
+def matched_files(eq_file_loc,data_path,sep):
+    if not sep:
+        sep = '\\'
     # from the location of a good file and the location of other files, retrieve the location of all matching files
-    dfile = min_dets(eq_file_loc)
+    dfile = min_dets(eq_file_loc,sep)
     
     # retrieve the files in that path that match 
     file_locs = []
@@ -193,7 +199,8 @@ def matched_files(eq_file_loc,data_path):
     k=[]
     for file in file_locs:
         if not file.lower().endswith('recordings.csv'):
-            File_dets=min_dets_sem(file)
+            print(file)
+            File_dets=min_dets_sem(file,sep)
             k.append(File_dets)
     df_files=pd.DataFrame(data=k)
 
@@ -206,8 +213,10 @@ def matched_files(eq_file_loc,data_path):
     return list(matched_files['FullLoc'])+list(matched_files['SEMLoc'].unique())
     
 
-def min_dets_sem(eq_file_loc): # for files output by the lab manager desktop app, so far
-    w = eq_file_loc.split('\\')
+def min_dets_sem(eq_file_loc,sep): # for files output by the lab manager desktop app, so far
+    if not sep:
+        sep = '\\'
+    w = eq_file_loc.split(sep)
     file_name = w[-1]
     f = file_name.split('-')
     Signal = f[0]
@@ -228,12 +237,12 @@ def min_dets_sem(eq_file_loc): # for files output by the lab manager desktop app
     if eq_file_loc.startswith('C:\\Users\\Public\\Documents\\Equivital\\Equivital Manager Wizard\\'): # initial qiosk exports
         fn = w[-1].split('-')[-1][:-3]+'SEM'
         sem_path = w[:-3]+['Raw SEM Data',w[-2],fn]
-        sem_loc = '\\'.join(sem_path)
+        sem_loc = sep.join(sem_path)
     else:
         if w[-2].lower().startswith('csv'): # Use earlier details to formulate location and structure
             fn = file_name.split('-')[-1][:-3]+'SEM'
-            sem_path = eq_file_loc.split('\\')[:-2] + ['SEM',DevName,fn]
-            sem_loc = '\\'.join(sem_path)
+            sem_path = eq_file_loc.split(sep)[:-2] + ['SEM',DevName,fn]
+            sem_loc = sep.join(sem_path)
         else:
             return []
 
@@ -249,7 +258,7 @@ def min_dets_sem(eq_file_loc): # for files output by the lab manager desktop app
        'SEMLoc': sem_loc}
     return File_dets
 
-def qiosk_recordings(projectpath,projecttag):
+def qiosk_recordings(projectpath,projecttag,sep):
     file_locs = []
     for root, dirs, files in os.walk(projectpath):
         for file in files:

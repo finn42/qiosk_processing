@@ -2,14 +2,4 @@
 
 # Jupyter Notebook
 .ipynb_checkpoints
-
-# data folders
-Battery_tests/
-Fit_tests/
-Music_test/
-RITMO Extract Data/
-lit/
-
-RITMO Extract Data-20221005T120502Z-001.zip
-FitTesting18Jan2023-20230119T074846Z-001.zip
-
+__pycache__/
