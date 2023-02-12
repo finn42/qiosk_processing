@@ -149,6 +149,32 @@ def test_plot_signals(V): # V is a qiosk file read into pandas
     else:
         print('Not enough data')
         
+def cut_by_time(eq_file_loc,t1,t2):
+    X = pd.DataFrame()
+    if eq_file_loc.lower().endswith('csv'): 
+        V = pd.read_csv(eq_file_loc,skipinitialspace=True)
+        cols = V.columns
+        if 'DateTime' in cols:
+            V['DateTime'] = pd.to_datetime(V['DateTime'])
+            # if it made of dateTime stamps without millisecond values because the sampling is rare, force it!
+#             if len(str(V.index[0]))<30: 
+#                 V['DateTime'] = V['DateTime'] + dt.timedelta(milliseconds=5)
+            V.set_index(V['DateTime'],inplace=True)
+            V.drop(['DateTime'],axis=1, inplace=True)
+            X = V.loc[V.index>t1,:].copy()
+            X = X.loc[X.index<t2,:].copy()
+            if len(X)<1:
+                print('Recording does not intersect with that time interval')
+                return
+            else:
+                return X
+        else:
+            print('Not a suitable format')
+            return
+    else:
+        print('Not a CSV')
+        return
+        
 def test_plot_signals_interval(V,t1,t2): # V is a qiosk file read into pandas
     # its on you to be sure these time stamps are within the recording interval of the file
     if len(V)>2:
@@ -156,7 +182,7 @@ def test_plot_signals_interval(V,t1,t2): # V is a qiosk file read into pandas
         W = V.select_dtypes(include=['int64','float64'])
         W.set_index(V['DateTime'],inplace=True)
         cols = W.columns
-        X = W.loc[W.index>t1,:].copy()
+        X = W.loc[W.index>t1,:]
         X = X.loc[X.index<t2,:].copy()
         for c in cols:
             fig, (ax1) = plt.subplots(1,1,figsize=[15,2])
@@ -165,6 +191,7 @@ def test_plot_signals_interval(V,t1,t2): # V is a qiosk file read into pandas
             plt.show()
     else:
         print('No data') 
+
         
 def test_plot_signals_interval_save(V,t1,t2,plotname): # V is a qiosk file read into pandas
     # its on you to be sure these time stamps are within the recording interval of the file
@@ -214,8 +241,6 @@ def matched_files(eq_file_loc,data_path,sep):
     
 
 def min_dets_sem(eq_file_loc,sep): # for files output by the lab manager desktop app, so far
-    if not sep:
-        sep = '\\'
     w = eq_file_loc.split(sep)
     file_name = w[-1]
     f = file_name.split('-')
