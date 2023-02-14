@@ -226,10 +226,11 @@ def matched_files(eq_file_loc,data_path,sep):
     k=[]
     for file in file_locs:
         if not file.lower().endswith('recordings.csv'):
-            print(file)
+#             print(file)
             File_dets=min_dets_sem(file,sep)
             k.append(File_dets)
     df_files=pd.DataFrame(data=k)
+#     print(df_files)
 
     match_fields = ['ID','DevName','Date','Session']
 
@@ -242,7 +243,7 @@ def matched_files(eq_file_loc,data_path,sep):
 
 def min_dets_sem(eq_file_loc,sep): # for files output by the lab manager desktop app, so far
     w = eq_file_loc.split(sep)
-    file_name = w[-1]
+    file_name = w[-1] #ECG-Pilot_1-3420755-23020100-trimmed.csv'
     f = file_name.split('-')
     Signal = f[0]
     DevName = f[1]#filings[-2]
@@ -258,18 +259,22 @@ def min_dets_sem(eq_file_loc,sep): # for files output by the lab manager desktop
         Session = int(f[3][6:8])
     fileSize = os.path.getsize(eq_file_loc)
     
-    # assuming qiosks file structure is consistent, SEM file naming should be reliable
-    if eq_file_loc.startswith('C:\\Users\\Public\\Documents\\Equivital\\Equivital Manager Wizard\\'): # initial qiosk exports
-        fn = w[-1].split('-')[-1][:-3]+'SEM'
-        sem_path = w[:-3]+['Raw SEM Data',w[-2],fn]
-        sem_loc = sep.join(sem_path)
-    else:
-        if w[-2].lower().startswith('csv'): # Use earlier details to formulate location and structure
-            fn = file_name.split('-')[-1][:-3]+'SEM'
-            sem_path = eq_file_loc.split(sep)[:-2] + ['SEM',DevName,fn]
+    if len(f)<5: # no trimming feilds included, so sem file
+        # assuming qiosks file structure is consistent, SEM file naming should be reliable
+        if eq_file_loc.startswith('C:\\Users\\Public\\Documents\\Equivital\\Equivital Manager Wizard\\'): # initial exports
+            fn = w[-1].split('-')[-1][:-3]+'SEM'
+            sem_path = w[:-3]+['Raw SEM Data',w[-2],fn]
             sem_loc = sep.join(sem_path)
         else:
-            return []
+            if w[-2].lower().startswith('csv'): # Use earlier details to formulate location and structure
+                fn = file_name.split('-')[-1][:-3]+'SEM'
+                sem_path = eq_file_loc.split(sep)[:-2] + ['SEM',DevName,fn]
+                sem_loc = sep.join(sem_path)
+            else:
+                sem_loc = ''
+    else:
+        sem_loc = ''
+
 
     File_dets={'Signal':Signal, #f[-2].split('_')[-1],
        'DevName':DevName,
