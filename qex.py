@@ -149,6 +149,36 @@ def test_plot_signals(V): # V is a qiosk file read into pandas
     else:
         print('Not enough data')
         
+def test_plot_signal(V): # V is a qiosk file read into pandas
+    if len(V)>2:
+        V['DateTime'] = pd.to_datetime(V['DateTime'])
+        W = V.select_dtypes(include=['int64','float64'])
+        W.set_index(V['DateTime'],inplace=True)
+        cols = W.columns
+        print(cols[0])
+        c = cols[0]
+        # excerpt a minute of signal from the middle of the recording
+        if V['DateTime'].iloc[-1]-V['DateTime'].iloc[0]>pd.to_timedelta(120,'s'):
+            t1 =  V['DateTime'].iloc[int(len(V)/2)]
+            t2 = t1+pd.to_timedelta(60,'s')
+            X = W.loc[W.index>t1,:].copy()
+            X = X.loc[X.index<t2,:].copy()
+            #for c in cols[0]:
+            fig, (ax1, ax2) = plt.subplots(1,2,figsize=[15,2])
+            W[c].plot(ax=ax1)
+            ax1.set_ylabel(c)
+            X.loc[:,c].plot(ax=ax2)
+            ax2.set_xlabel('60 seconds')
+            plt.show()
+        else:
+           # for c in cols[0]:
+            fig, (ax1) = plt.subplots(1,1,figsize=[15,2])
+            W[c].plot(ax=ax1)
+            ax1.set_ylabel(c)
+            plt.show()
+    else:
+        print('Not enough data')
+        
 def cut_by_time(eq_file_loc,t1,t2):
     X = pd.DataFrame()
     if eq_file_loc.lower().endswith('csv'): 
