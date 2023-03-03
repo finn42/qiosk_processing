@@ -2,5 +2,5 @@
 
 # Jupyter Notebook
 .ipynb_checkpoints
-__pycache__/*
-__pycache__/qex.cpython-39.pyc
+__pycache__/
+ *.pyc

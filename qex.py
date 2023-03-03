@@ -123,7 +123,8 @@ def data_dets(eq_file_loc,sep): #rec_start = V['DateTime'].iloc[0]
 
 def test_plot_signals(V): # V is a qiosk file read into pandas
     if len(V)>2:
-        V['DateTime'] = pd.to_datetime(V['DateTime'])
+        if isinstance(V.index, pd.DatetimeIndex):
+            V['DateTime'] = V.index
         W = V.select_dtypes(include=['int64','float64'])
         W.set_index(V['DateTime'],inplace=True)
         cols = W.columns
@@ -151,6 +152,8 @@ def test_plot_signals(V): # V is a qiosk file read into pandas
         
 def test_plot_signal(V): # V is a qiosk file read into pandas
     if len(V)>2:
+        if isinstance(V.index, pd.DatetimeIndex):
+            V['DateTime'] = V.index
         V['DateTime'] = pd.to_datetime(V['DateTime'])
         W = V.select_dtypes(include=['int64','float64'])
         W.set_index(V['DateTime'],inplace=True)
@@ -208,6 +211,8 @@ def cut_by_time(eq_file_loc,t1,t2):
 def test_plot_signals_interval(V,t1,t2): # V is a qiosk file read into pandas
     # its on you to be sure these time stamps are within the recording interval of the file
     if len(V)>2:
+        if isinstance(V.index, pd.DatetimeIndex):
+            V['DateTime'] = V.index
         V['DateTime'] = pd.to_datetime(V['DateTime'])
         W = V.select_dtypes(include=['int64','float64'])
         W.set_index(V['DateTime'],inplace=True)
@@ -226,6 +231,8 @@ def test_plot_signals_interval(V,t1,t2): # V is a qiosk file read into pandas
 def test_plot_signals_interval_save(V,t1,t2,plotname): # V is a qiosk file read into pandas
     # its on you to be sure these time stamps are within the recording interval of the file
     if len(V)>2:
+        if isinstance(V.index, pd.DatetimeIndex):
+            V['DateTime'] = V.index
         V['DateTime'] = pd.to_datetime(V['DateTime'])
         W = V.select_dtypes(include=['int64','float64'])
         W.set_index(V['DateTime'],inplace=True)
@@ -334,6 +341,26 @@ def qiosk_recordings(projectpath,projecttag,sep):
         df_datafiles=pd.DataFrame(data=k)#
         df_datafiles=df_datafiles.sort_values(by='RecStart').reset_index(drop=True)
         df_datafiles.to_csv(projectpath + projecttag + '_Qiosk_recordings.csv')
+        return df_datafiles
+    else:
+        print('Path is empty of DATA files.')
+        return []
+    
+def qiosk_rec_check(projectpath,projecttag,sep):
+    file_locs = []
+    for root, dirs, files in os.walk(projectpath):
+        for file in files:
+            if(file.lower().endswith(".csv")):
+                if file.lower().startswith('data'):
+                    file_locs.append(os.path.join(root,file))
+    if len(file_locs)>0:
+        k=[]           
+        for f in file_locs:
+            File_dets=data_dets(f,sep)
+            if File_dets:
+                k.append(File_dets)
+        df_datafiles=pd.DataFrame(data=k)#
+        df_datafiles=df_datafiles.sort_values(by='RecStart').reset_index(drop=True)
         return df_datafiles
     else:
         print('Path is empty of DATA files.')
